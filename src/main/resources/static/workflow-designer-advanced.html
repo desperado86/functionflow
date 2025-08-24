@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高级工作流设计器 - 函数流工作引擎</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 1.5em;
+            font-weight: 300;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #218838;
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .main-container {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+        
+        .sidebar {
+            width: 320px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .sidebar-section {
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .sidebar-section h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .sidebar-section h3 .toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .function-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .function-item {
+            padding: 12px;
+            margin: 8px 0;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            cursor: grab;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .function-item:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .function-item.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+        }
+        
+        .function-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .function-desc {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        
+        .function-category {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .function-inputs {
+            font-size: 11px;
+            color: #667eea;
+            margin-top: 4px;
+            font-style: italic;
+        }
+        
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            background: #fafafa;
+        }
+        
+        .node-toolbar {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .node-toolbar button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+        
+        .node-toolbar .btn-add {
+            background: #28a745;
+            color: white;
+        }
+        
+        .node-toolbar .btn-add:hover {
+            background: #218838;
+        }
+        
+        .node-toolbar .btn-clear {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .node-toolbar .btn-clear:hover {
+            background: #c82333;
+        }
+        
+        .node-toolbar .btn-save {
+            background: #007bff;
+            color: white;
+        }
+        
+        .node-toolbar .btn-save:hover {
+            background: #0056b3;
+        }
+        
+        .properties-panel {
+            width: 320px;
+            background: white;
+            border-left: 1px solid #e0e0e0;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .properties-panel h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+            font-size: 16px;
+            color: #666;
+        }
+        
+        .error {
+            color: #dc3545;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .workflow-info {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .workflow-info h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        
+        .workflow-stats {
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 18px;
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        .drop-zone {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 40px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            text-align: center;
+            color: #999;
+            font-size: 16px;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .drop-zone.active {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+        
+        .reactflow-wrapper {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 4px;
+            color: white;
+            font-size: 14px;
+            z-index: 10000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+        
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .toast.success {
+            background: #28a745;
+        }
+        
+        .toast.error {
+            background: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>高级工作流设计器</h1>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="loadWorkflow()">加载工作流</button>
+            <button class="btn btn-primary" onclick="saveWorkflow()">保存工作流</button>
+        </div>
+    </div>
+    
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <h3>
+                    函数库
+                    <button class="toggle-btn" onclick="toggleSection('functionList')">−</button>
+                </h3>
+                <div class="function-list" id="functionList">
+                    <div class="loading">加载函数中...</div>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>
+                    工作流信息
+                    <button class="toggle-btn" onclick="toggleSection('workflowInfo')">−</button>
+                </h3>
+                <div id="workflowInfo">
+                    <div class="form-group">
+                        <label>工作流名称</label>
+                        <input type="text" id="workflowName" placeholder="输入工作流名称">
+                    </div>
+                    <div class="form-group">
+                        <label>工作流描述</label>
+                        <textarea id="workflowDescription" placeholder="输入工作流描述"></textarea>
+                    </div>
+                    <div class="workflow-info">
+                        <h4>工作流统计</h4>
+                        <div class="workflow-stats">
+                            <div class="stat-item">
+                                <div class="stat-number" id="nodeCount">0</div>
+                                <div>节点</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="edgeCount">0</div>
+                                <div>连接</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="canvas-container">
+            <div class="node-toolbar">
+                <button class="btn-add" onclick="addNode()">添加节点</button>
+                <button class="btn-clear" onclick="clearCanvas()">清空画布</button>
+                <button class="btn-save" onclick="saveWorkflow()">保存</button>
+            </div>
+            <div class="reactflow-wrapper" id="reactflow"></div>
+            <div class="drop-zone" id="dropZone">
+                拖拽函数到此处创建节点
+            </div>
+        </div>
+        
+        <div class="properties-panel">
+            <h3>节点属性</h3>
+            <div id="nodeProperties">
+                <p style="color: #666; text-align: center;">选择一个节点来编辑属性</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast 通知 -->
+    <div class="toast" id="toast"></div>
+
+    <!-- React Flow CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/reactflow@11/dist/style.css"></script>
+    <script src="https://unpkg.com/reactflow@11/dist/umd/index.js"></script>
+
+    <script type="text/babel">
+        // 等待ReactFlow加载完成
+        const ReactFlowComponents = window.ReactFlow || {};
+        const { ReactFlow, Controls, Background, addEdge } = ReactFlowComponents;
+        
+        // 自定义节点组件
+        const CustomNode = ({ data, selected }) => {
+            return (
+                <div style={{
+                    padding: '12px',
+                    borderRadius: '8px',
+                    backgroundColor: selected ? '#e3f2fd' : '#fff',
+                    border: selected ? '2px solid #2196f3' : '1px solid #ddd',
+                    boxShadow: selected ? '0 4px 12px rgba(33, 150, 243, 0.3)' : '0 2px 8px rgba(0,0,0,0.1)',
+                    minWidth: '150px',
+                    maxWidth: '200px'
+                }}>
+                    <div style={{ fontWeight: 'bold', marginBottom: '4px', color: '#333' }}>
+                        {data.label}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                        {data.description}
+                    </div>
+                    <div style={{ fontSize: '10px', color: '#999', textTransform: 'uppercase' }}>
+                        {data.category}
+                    </div>
+                </div>
+            );
+        };
+        
+        // 工作流设计器组件
+        function WorkflowDesigner() {
+            const [nodes, setNodes] = React.useState([]);
+            const [edges, setEdges] = React.useState([]);
+            const [selectedNode, setSelectedNode] = React.useState(null);
+            
+            const onConnect = React.useCallback((params) => {
+                setEdges((eds) => addEdge(params, eds));
+            }, []);
+            
+            const onNodeClick = React.useCallback((event, node) => {
+                setSelectedNode(node);
+                updateNodeProperties(node);
+            }, []);
+            
+            // 更新节点属性面板
+            window.updateNodeProperties = (node) => {
+                const propertiesPanel = document.getElementById('nodeProperties');
+                if (!node) {
+                    propertiesPanel.innerHTML = '<p style="color: #666; text-align: center;">选择一个节点来编辑属性</p>';
+                    return;
+                }
+                
+                propertiesPanel.innerHTML = `
+                    <div class="form-group">
+                        <label>节点名称</label>
+                        <input type="text" value="${node.data.label || ''}" onchange="updateNodeData('${node.id}', 'label', this.value)">
+                    </div>
+                    <div class="form-group">
+                        <label>描述</label>
+                        <textarea onchange="updateNodeData('${node.id}', 'description', this.value)">${node.data.description || ''}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>函数ID</label>
+                        <input type="text" value="${node.data.functionId || ''}" readonly>
+                    </div>
+                `;
+            };
+            
+            // 更新节点数据
+            window.updateNodeData = (nodeId, field, value) => {
+                setNodes((nds) => 
+                    nds.map((node) => 
+                        node.id === nodeId 
+                            ? { ...node, data: { ...node.data, [field]: value } }
+                            : node
+                    )
+                );
+            };
+            
+            // 添加函数节点
+            window.addFunctionNode = (functionData, position) => {
+                const newNode = {
+                    id: `node_${Date.now()}`,
+                    type: 'custom',
+                    position: position,
+                    data: {
+                        label: functionData.name,
+                        description: functionData.description,
+                        category: functionData.category,
+                        functionId: functionData.id,
+                        inputs: functionData.inputs,
+                        outputs: functionData.outputs
+                    }
+                };
+                
+                setNodes((nds) => [...nds, newNode]);
+                updateStats();
+                showToast('节点添加成功', 'success');
+            };
+            
+            // 添加普通节点
+            window.addNode = () => {
+                const newNode = {
+                    id: `node_${Date.now()}`,
+                    type: 'custom',
+                    position: { x: 100, y: 100 },
+                    data: {
+                        label: '新节点',
+                        description: '节点描述',
+                        category: '自定义'
+                    }
+                };
+                
+                setNodes((nds) => [...nds, newNode]);
+                updateStats();
+            };
+            
+            // 清空画布
+            window.clearCanvas = () => {
+                setNodes([]);
+                setEdges([]);
+                setSelectedNode(null);
+                updateNodeProperties(null);
+                updateStats();
+            };
+            
+            // 保存工作流
+            window.saveWorkflow = () => {
+                const workflowName = document.getElementById('workflowName').value;
+                const workflowDescription = document.getElementById('workflowDescription').value;
+                
+                if (!workflowName) {
+                    showToast('请输入工作流名称', 'error');
+                    return;
+                }
+                
+                const workflow = {
+                    id: `workflow_${Date.now()}`,
+                    name: workflowName,
+                    description: workflowDescription,
+                    nodes: nodes.map(node => ({
+                        id: node.id,
+                        type: node.type,
+                        position: node.position,
+                        data: node.data
+                    })),
+                    edges: edges.map(edge => ({
+                        id: edge.id,
+                        source: edge.source,
+                        target: edge.target,
+                        sourceHandle: edge.sourceHandle,
+                        targetHandle: edge.targetHandle
+                    }))
+                };
+                
+                // 保存到本地存储
+                localStorage.setItem('savedWorkflow', JSON.stringify(workflow));
+                showToast('工作流已保存到本地存储', 'success');
+            };
+            
+            // 加载工作流
+            window.loadWorkflow = () => {
+                const saved = localStorage.getItem('savedWorkflow');
+                if (saved) {
+                    const workflow = JSON.parse(saved);
+                    document.getElementById('workflowName').value = workflow.name || '';
+                    document.getElementById('workflowDescription').value = workflow.description || '';
+                    setNodes(workflow.nodes || []);
+                    setEdges(workflow.edges || []);
+                    updateStats();
+                    showToast('工作流已加载', 'success');
+                } else {
+                    showToast('没有找到保存的工作流', 'error');
+                }
+            };
+            
+            // 更新统计信息
+            window.updateStats = () => {
+                document.getElementById('nodeCount').textContent = nodes.length;
+                document.getElementById('edgeCount').textContent = edges.length;
+            };
+            
+            const nodeTypes = {
+                custom: CustomNode
+            };
+            
+            return (
+                <div style={{ width: '100%', height: '100%' }}>
+                    <ReactFlow
+                        nodes={nodes}
+                        edges={edges}
+                        onNodesChange={(changes) => {
+                            setNodes((nds) => {
+                                return nds.map((node) => {
+                                    const change = changes.find((c) => c.id === node.id);
+                                    if (change && change.type === 'position') {
+                                        return { ...node, position: change.position };
+                                    }
+                                    return node;
+                                });
+                            });
+                        }}
+                        onEdgesChange={(changes) => {
+                            setEdges((eds) => {
+                                return eds.map((edge) => {
+                                    const change = changes.find((c) => c.id === edge.id);
+                                    if (change && change.type === 'remove') {
+                                        return null;
+                                    }
+                                    return edge;
+                                }).filter(Boolean);
+                            });
+                        }}
+                        onConnect={onConnect}
+                        onNodeClick={onNodeClick}
+                        nodeTypes={nodeTypes}
+                        fitView
+                    >
+                        <Controls />
+                        <Background />
+                    </ReactFlow>
+                </div>
+            );
+        }
+        
+        // 渲染应用
+        ReactDOM.render(<WorkflowDesigner />, document.getElementById('reactflow'));
+        
+        // 显示Toast通知
+        window.showToast = (message, type = 'success') => {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        };
+        
+        // 切换侧边栏部分
+        window.toggleSection = (sectionId) => {
+            const section = document.getElementById(sectionId);
+            const toggleBtn = section.previousElementSibling.querySelector('.toggle-btn');
+            
+            if (section.style.display === 'none') {
+                section.style.display = 'block';
+                toggleBtn.textContent = '−';
+            } else {
+                section.style.display = 'none';
+                toggleBtn.textContent = '+';
+            }
+        };
+        
+        // 加载函数列表
+        async function loadFunctions() {
+            try {
+                const response = await fetch('/api/functions');
+                const functions = await response.json();
+                
+                const functionList = document.getElementById('functionList');
+                functionList.innerHTML = functions.map(func => 
+                    '<div class="function-item" ' +
+                         'draggable="true" ' +
+                         'ondragstart="handleDragStart(event, \'' + func.id + '\')" ' +
+                         'ondragend="handleDragEnd(event)" ' +
+                         'data-function="' + func.id + '">' +
+                        '<div class="function-name">' + func.name + '</div>' +
+                        '<div class="function-desc">' + func.description + '</div>' +
+                        '<div class="function-category">' + func.category + '</div>' +
+                        (func.inputs && func.inputs.length > 0 ? 
+                            '<div class="function-inputs">输入: ' + func.inputs.map(input => input.name).join(', ') + '</div>' : 
+                            '') +
+                    '</div>'
+                ).join('');
+            } catch (error) {
+                document.getElementById('functionList').innerHTML = 
+                    '<div class="error">加载函数失败: ' + error.message + '</div>';
+            }
+        }
+        
+        // 拖拽处理
+        window.handleDragStart = (event, functionId) => {
+            event.dataTransfer.setData('application/json', functionId);
+            event.target.classList.add('dragging');
+        };
+        
+        window.handleDragEnd = (event) => {
+            event.target.classList.remove('dragging');
+        };
+        
+        // 画布拖拽处理
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.querySelector('.canvas-container');
+            const dropZone = document.getElementById('dropZone');
+            
+            canvas.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('active');
+            });
+            
+            canvas.addEventListener('dragleave', (e) => {
+                if (!canvas.contains(e.relatedTarget)) {
+                    dropZone.classList.remove('active');
+                }
+            });
+            
+            canvas.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('active');
+                
+                const functionId = e.dataTransfer.getData('application/json');
+                if (functionId) {
+                    // 从API获取完整的函数数据
+                    fetch('/api/functions/' + functionId)
+                        .then(response => response.json())
+                        .then(functionData => {
+                            // 计算放置位置
+                            const rect = canvas.getBoundingClientRect();
+                            const position = {
+                                x: e.clientX - rect.left,
+                                y: e.clientY - rect.top
+                            };
+                            
+                            // 添加节点
+                            window.addFunctionNode(functionData, position);
+                        })
+                        .catch(error => {
+                            console.error('获取函数数据失败:', error);
+                            showToast('获取函数数据失败', 'error');
+                        });
+                }
+            });
+            
+            // 加载函数
+            loadFunctions();
+        });
+    </script>
+</body>
+</html>

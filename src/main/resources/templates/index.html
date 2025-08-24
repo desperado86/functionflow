@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>函数流工作引擎</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 30px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .action-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .action-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .action-card h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .action-card p {
+            margin: 0;
+            color: #666;
+        }
+        .function-list {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .function-list h3 {
+            margin: 0 0 20px 0;
+            color: #333;
+        }
+        .function-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        .function-item {
+            background: white;
+            border-radius: 6px;
+            padding: 15px;
+            border-left: 3px solid #28a745;
+        }
+        .function-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .function-desc {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .function-category {
+            display: inline-block;
+            background: #e9ecef;
+            color: #666;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>函数流工作引擎</h1>
+            <p>强大的函数编排和工作流执行平台</p>
+        </div>
+        
+        <div class="content">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" th:text="${functions.size()}">0</div>
+                    <div class="stat-label">可用函数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">3</div>
+                    <div class="stat-label">函数分类</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">系统可用性</div>
+                </div>
+            </div>
+            
+            <div class="actions">
+                <div class="action-card" onclick="window.location.href='/functions'">
+                    <h3>📋 函数管理</h3>
+                    <p>查看和管理所有可用函数</p>
+                </div>
+                <div class="action-card" onclick="window.location.href='/workflow-designer.html'">
+                    <h3>🎨 工作流设计器</h3>
+                    <p>可视化设计工作流</p>
+                </div>
+                <div class="action-card" onclick="window.location.href='/workflow-designer-advanced.html'">
+                    <h3>🚀 高级设计器</h3>
+                    <p>支持拖拽的高级工作流设计器</p>
+                </div>
+                <div class="action-card" onclick="window.open('/api/functions', '_blank')">
+                    <h3>🔧 API文档</h3>
+                    <p>查看REST API接口</p>
+                </div>
+            </div>
+            
+            <div class="function-list">
+                <h3>最近添加的函数</h3>
+                <div class="function-grid">
+                    <div class="function-item" th:each="function : ${functions}">
+                        <div class="function-name" th:text="${function.name}">函数名称</div>
+                        <div class="function-desc" th:text="${function.description}">函数描述</div>
+                        <div class="function-category" th:text="${function.category}">分类</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

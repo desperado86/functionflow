@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工作流设计器 - 函数流工作引擎</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 1.5em;
+            font-weight: 300;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #218838;
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .main-container {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+        
+        .sidebar {
+            width: 300px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-section {
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .sidebar-section h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .function-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .function-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            cursor: grab;
+            transition: all 0.2s ease;
+        }
+        
+        .function-item:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
+        
+        .function-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .function-desc {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        
+        .function-category {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+        }
+        
+        .canvas-container {
+            flex: 1;
+            background: #fafafa;
+            position: relative;
+        }
+        
+        .reactflow-wrapper {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+            font-size: 16px;
+            color: #666;
+        }
+        
+        .error {
+            color: #dc3545;
+            padding: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>工作流设计器</h1>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="loadWorkflow()">加载工作流</button>
+            <button class="btn btn-primary" onclick="saveWorkflow()">保存工作流</button>
+        </div>
+    </div>
+    
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <h3>函数库</h3>
+                <div class="function-list" id="functionList">
+                    <div class="loading">加载函数中...</div>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>工作流信息</h3>
+                <div class="form-group">
+                    <label>工作流名称</label>
+                    <input type="text" id="workflowName" placeholder="输入工作流名称" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px;">
+                </div>
+                <div class="form-group">
+                    <label>工作流描述</label>
+                    <textarea id="workflowDescription" placeholder="输入工作流描述" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; height: 60px; resize: vertical;"></textarea>
+                </div>
+            </div>
+        </div>
+        
+        <div class="canvas-container">
+            <div class="reactflow-wrapper" id="reactflow"></div>
+        </div>
+    </div>
+
+    <!-- React Flow CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/reactflow@11/dist/style.css"></script>
+    <script src="https://unpkg.com/reactflow@11/dist/umd/index.js"></script>
+
+    <script type="text/babel">
+        const { ReactFlow, Controls, Background, addEdge } = ReactFlow;
+        
+        // 自定义节点组件
+        const CustomNode = ({ data, selected }) => {
+            return (
+                <div style={{
+                    padding: '10px',
+                    borderRadius: '6px',
+                    backgroundColor: selected ? '#e3f2fd' : '#fff',
+                    border: selected ? '2px solid #2196f3' : '1px solid #ddd',
+                    boxShadow: selected ? '0 4px 12px rgba(33, 150, 243, 0.3)' : '0 2px 8px rgba(0,0,0,0.1)',
+                    minWidth: '120px'
+                }}>
+                    <div style={{ fontWeight: 'bold', marginBottom: '4px', color: '#333' }}>
+                        {data.label}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#666' }}>
+                        {data.description}
+                    </div>
+                </div>
+            );
+        };
+        
+        // 工作流设计器组件
+        function WorkflowDesigner() {
+            const [nodes, setNodes] = React.useState([]);
+            const [edges, setEdges] = React.useState([]);
+            
+            const onConnect = React.useCallback((params) => {
+                setEdges((eds) => addEdge(params, eds));
+            }, []);
+            
+            const onNodeClick = React.useCallback((event, node) => {
+                console.log('点击节点:', node);
+            }, []);
+            
+            // 添加函数节点
+            window.addFunctionNode = (functionData, position) => {
+                const newNode = {
+                    id: `node_${Date.now()}`,
+                    type: 'custom',
+                    position: position,
+                    data: {
+                        label: functionData.name,
+                        description: functionData.description,
+                        category: functionData.category,
+                        functionId: functionData.id
+                    }
+                };
+                
+                setNodes((nds) => [...nds, newNode]);
+            };
+            
+            // 清空画布
+            window.clearCanvas = () => {
+                setNodes([]);
+                setEdges([]);
+            };
+            
+            // 保存工作流
+            window.saveWorkflow = () => {
+                const workflowName = document.getElementById('workflowName').value;
+                const workflowDescription = document.getElementById('workflowDescription').value;
+                
+                if (!workflowName) {
+                    alert('请输入工作流名称');
+                    return;
+                }
+                
+                const workflow = {
+                    id: `workflow_${Date.now()}`,
+                    name: workflowName,
+                    description: workflowDescription,
+                    nodes: nodes.map(node => ({
+                        id: node.id,
+                        type: node.type,
+                        position: node.position,
+                        data: node.data
+                    })),
+                    edges: edges.map(edge => ({
+                        id: edge.id,
+                        source: edge.source,
+                        target: edge.target,
+                        sourceHandle: edge.sourceHandle,
+                        targetHandle: edge.targetHandle
+                    }))
+                };
+                
+                // 保存到本地存储
+                localStorage.setItem('savedWorkflow', JSON.stringify(workflow));
+                alert('工作流已保存到本地存储');
+            };
+            
+            // 加载工作流
+            window.loadWorkflow = () => {
+                const saved = localStorage.getItem('savedWorkflow');
+                if (saved) {
+                    const workflow = JSON.parse(saved);
+                    document.getElementById('workflowName').value = workflow.name || '';
+                    document.getElementById('workflowDescription').value = workflow.description || '';
+                    setNodes(workflow.nodes || []);
+                    setEdges(workflow.edges || []);
+                    alert('工作流已加载');
+                } else {
+                    alert('没有找到保存的工作流');
+                }
+            };
+            
+            const nodeTypes = {
+                custom: CustomNode
+            };
+            
+            return (
+                <div style={{ width: '100%', height: '100%' }}>
+                    <ReactFlow
+                        nodes={nodes}
+                        edges={edges}
+                        onNodesChange={(changes) => {
+                            setNodes((nds) => {
+                                return nds.map((node) => {
+                                    const change = changes.find((c) => c.id === node.id);
+                                    if (change && change.type === 'position') {
+                                        return { ...node, position: change.position };
+                                    }
+                                    return node;
+                                });
+                            });
+                        }}
+                        onEdgesChange={(changes) => {
+                            setEdges((eds) => {
+                                return eds.map((edge) => {
+                                    const change = changes.find((c) => c.id === edge.id);
+                                    if (change && change.type === 'remove') {
+                                        return null;
+                                    }
+                                    return edge;
+                                }).filter(Boolean);
+                            });
+                        }}
+                        onConnect={onConnect}
+                        onNodeClick={onNodeClick}
+                        nodeTypes={nodeTypes}
+                        fitView
+                    >
+                        <Controls />
+                        <Background />
+                    </ReactFlow>
+                </div>
+            );
+        }
+        
+        // 渲染应用
+        ReactDOM.render(<WorkflowDesigner />, document.getElementById('reactflow'));
+        
+        // 加载函数列表
+        async function loadFunctions() {
+            try {
+                const response = await fetch('/api/functions');
+                const functions = await response.json();
+                
+                const functionList = document.getElementById('functionList');
+                functionList.innerHTML = functions.map(func => 
+                    '<div class="function-item" ' +
+                         'draggable="true" ' +
+                         'ondragstart="handleDragStart(event, \'' + func.id + '\')" ' +
+                         'data-function="' + func.id + '">' +
+                        '<div class="function-name">' + func.name + '</div>' +
+                        '<div class="function-desc">' + func.description + '</div>' +
+                        '<div class="function-category">' + func.category + '</div>' +
+                    '</div>'
+                ).join('');
+            } catch (error) {
+                document.getElementById('functionList').innerHTML = 
+                    '<div class="error">加载函数失败: ' + error.message + '</div>';
+            }
+        }
+        
+        // 拖拽处理
+        window.handleDragStart = (event, functionId) => {
+            event.dataTransfer.setData('application/json', functionId);
+        };
+        
+        // 页面加载完成后加载函数
+        document.addEventListener('DOMContentLoaded', loadFunctions);
+    </script>
+</body>
+</html>
