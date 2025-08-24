@@ -2,11 +2,14 @@ package com.functionflow.demo.functions;
 
 import com.functionflow.demo.annotation.Functions;
 import com.functionflow.demo.annotation.Function;
-import com.functionflow.demo.annotation.Input;
-import com.functionflow.demo.annotation.Output;
 import com.functionflow.demo.model.ComplexObject;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
 
 import org.springframework.stereotype.Component;
 
@@ -27,11 +30,20 @@ public class ComplexObjectFunctions {
      * 创建复杂对象
      */
     @Function(name = "创建复杂对象", description = "根据基本信息创建复杂对象")
-    public @Output(name = "complexObject", description = "创建的复杂对象", type = ComplexObject.class) 
-    ComplexObject createComplexObject(
-            @Input(name = "name", description = "对象名称", type = String.class, required = true) String name,
-            @Input(name = "age", description = "年龄", type = Integer.class, required = true) Integer age,
-            @Input(name = "email", description = "邮箱", type = String.class, required = true) String email) {
+    public ComplexObject createComplexObject(
+            @NotNull(message = "name is required") 
+            @Size(min = 2, max = 50, message = "name length must be between 2 and 50")
+            String name, 
+            
+            @NotNull(message = "age is required")
+            @Min(value = 0, message = "age must be positive")
+            @Max(value = 150, message = "age must be less than 150")
+            Integer age, 
+            
+            @NotNull(message = "email is required")
+            @Email(message = "email format is invalid")
+            @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", message = "email pattern is invalid")
+            String email) {
         
         ComplexObject.Address address = ComplexObject.Address.builder()
                 .street("123 Main St")
@@ -72,11 +84,7 @@ public class ComplexObjectFunctions {
      * 处理复杂对象
      */
     @Function(name = "处理复杂对象", description = "处理复杂对象并返回修改后的对象")
-    @Output(name = "processedObject", description = "处理后的复杂对象") 
-    public ComplexObject processComplexObject(
-            @Input(name = "object", description = "要处理的复杂对象") 
-            @NotNull(message = "对象不能为空")
-            ComplexObject object) {
+    public ComplexObject processComplexObject(ComplexObject object) {
         
         // 修改对象属性
         object.setName(object.getName() + " (Processed)");
@@ -102,10 +110,7 @@ public class ComplexObjectFunctions {
      * 提取对象信息
      */
     @Function(name = "提取对象信息", description = "从复杂对象中提取基本信息")
-    public @Output(name = "extractedInfo", description = "提取的信息", type = Map.class) 
-    Map<String, Object> extractObjectInfo(
-            @Input(name = "object", description = "要提取信息的复杂对象", type = ComplexObject.class, required = true) 
-            ComplexObject object) {
+    public Map<String, Object> extractObjectInfo(ComplexObject object) {
         
         Map<String, Object> info = new HashMap<>();
         info.put("name", object.getName());
@@ -123,10 +128,7 @@ public class ComplexObjectFunctions {
      * 验证复杂对象
      */
     @Function(name = "验证复杂对象", description = "验证复杂对象的完整性")
-    public @Output(name = "validationResult", description = "验证结果", type = Map.class) 
-    Map<String, Object> validateComplexObject(
-            @Input(name = "object", description = "要验证的复杂对象", type = ComplexObject.class, required = true) 
-            ComplexObject object) {
+    public Map<String, Object> validateComplexObject(ComplexObject object) {
         
         Map<String, Object> result = new HashMap<>();
         List<String> errors = new ArrayList<>();
@@ -172,12 +174,7 @@ public class ComplexObjectFunctions {
      * 合并复杂对象
      */
     @Function(name = "合并复杂对象", description = "合并两个复杂对象")
-    public @Output(name = "mergedObject", description = "合并后的复杂对象", type = ComplexObject.class) 
-    ComplexObject mergeComplexObjects(
-            @Input(name = "object1", description = "第一个复杂对象", type = ComplexObject.class, required = true) 
-            ComplexObject object1,
-            @Input(name = "object2", description = "第二个复杂对象", type = ComplexObject.class, required = true) 
-            ComplexObject object2) {
+    public ComplexObject mergeComplexObjects(ComplexObject object1, ComplexObject object2) {
         
         // 合并基本信息
         String mergedName = object1.getName() + " + " + object2.getName();

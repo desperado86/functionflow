@@ -364,6 +364,8 @@ public class FunctionScanner {
             try {
                 // 为所有类型生成JSON Schema，包括基本类型
                 jsonSchema = jsonSchemaGenerator.generateSchema(parameter.getType(), true);
+                // 合并验证注解到JSON Schema
+                mergeValidationToJsonSchema(jsonSchema, parameter);
             } catch (Exception e) {
                 log.warn("生成JSON Schema失败: {}", parameter.getType().getName(), e);
             }
@@ -511,6 +513,154 @@ public class FunctionScanner {
     }
 
     /**
+     * 将验证注解合并到JSON Schema中
+     */
+    private void mergeValidationToJsonSchema(ObjectNode jsonSchema, Parameter parameter) {
+        if (jsonSchema == null) {
+            return;
+        }
+
+        Annotation[] annotations = parameter.getAnnotations();
+        for (Annotation annotation : annotations) {
+            if (annotation instanceof NotNull) {
+                NotNull notNull = (NotNull) annotation;
+                // 将参数标记为必需
+                jsonSchema.put("required", true);
+                // 添加错误消息
+                if (!notNull.message().isEmpty() && !notNull.message().equals("{jakarta.validation.constraints.NotNull.message}")) {
+                    jsonSchema.put("errorMessage", notNull.message());
+                }
+            } else if (annotation instanceof Min) {
+                Min min = (Min) annotation;
+                long minValue = min.value();
+                // 检查类型是否为数字类型
+                if (isNumericType(jsonSchema)) {
+                    jsonSchema.put("minimum", minValue);
+                    // 添加错误消息
+                    if (!min.message().isEmpty() && !min.message().equals("{jakarta.validation.constraints.Min.message}")) {
+                        jsonSchema.put("minimumErrorMessage", min.message());
+                    }
+                }
+            } else if (annotation instanceof Max) {
+                Max max = (Max) annotation;
+                long maxValue = max.value();
+                // 检查类型是否为数字类型
+                if (isNumericType(jsonSchema)) {
+                    jsonSchema.put("maximum", maxValue);
+                    // 添加错误消息
+                    if (!max.message().isEmpty() && !max.message().equals("{jakarta.validation.constraints.Max.message}")) {
+                        jsonSchema.put("maximumErrorMessage", max.message());
+                    }
+                }
+            } else if (annotation instanceof Size) {
+                Size size = (Size) annotation;
+                // 检查类型是否为字符串或数组
+                if (isStringType(jsonSchema)) {
+                    jsonSchema.put("minLength", size.min());
+                    jsonSchema.put("maxLength", size.max());
+                    // 添加错误消息
+                    if (!size.message().isEmpty() && !size.message().equals("{jakarta.validation.constraints.Size.message}")) {
+                        jsonSchema.put("sizeErrorMessage", size.message());
+                    }
+                } else if (isArrayType(jsonSchema)) {
+                    jsonSchema.put("minItems", size.min());
+                    jsonSchema.put("maxItems", size.max());
+                    // 添加错误消息
+                    if (!size.message().isEmpty() && !size.message().equals("{jakarta.validation.constraints.Size.message}")) {
+                        jsonSchema.put("sizeErrorMessage", size.message());
+                    }
+                }
+            } else if (annotation instanceof Pattern) {
+                Pattern pattern = (Pattern) annotation;
+                String patternValue = pattern.regexp();
+                if (isStringType(jsonSchema)) {
+                    jsonSchema.put("pattern", patternValue);
+                    // 添加错误消息
+                    if (!pattern.message().isEmpty() && !pattern.message().equals("{jakarta.validation.constraints.Pattern.message}")) {
+                        jsonSchema.put("patternErrorMessage", pattern.message());
+                    }
+                }
+            } else if (annotation instanceof Email) {
+                Email email = (Email) annotation;
+                if (isStringType(jsonSchema)) {
+                    jsonSchema.put("format", "email");
+                    // 添加错误消息
+                    if (!email.message().isEmpty() && !email.message().equals("{jakarta.validation.constraints.Email.message}")) {
+                        jsonSchema.put("emailErrorMessage", email.message());
+                    }
+                }
+            } else if (annotation instanceof DecimalMin) {
+                DecimalMin decimalMin = (DecimalMin) annotation;
+                String minValue = decimalMin.value();
+                if (isNumericType(jsonSchema)) {
+                    jsonSchema.put("minimum", Double.parseDouble(minValue));
+                    // 添加错误消息
+                    if (!decimalMin.message().isEmpty() && !decimalMin.message().equals("{jakarta.validation.constraints.DecimalMin.message}")) {
+                        jsonSchema.put("minimumErrorMessage", decimalMin.message());
+                    }
+                }
+            } else if (annotation instanceof DecimalMax) {
+                DecimalMax decimalMax = (DecimalMax) annotation;
+                String maxValue = decimalMax.value();
+                if (isNumericType(jsonSchema)) {
+                    jsonSchema.put("maximum", Double.parseDouble(maxValue));
+                    // 添加错误消息
+                    if (!decimalMax.message().isEmpty() && !decimalMax.message().equals("{jakarta.validation.constraints.DecimalMax.message}")) {
+                        jsonSchema.put("maximumErrorMessage", decimalMax.message());
+                    }
+                }
+            } else if (annotation instanceof Digits) {
+                Digits digits = (Digits) annotation;
+                if (isNumericType(jsonSchema)) {
+                    // 对于数字类型，可以添加精度限制
+                    jsonSchema.put("multipleOf", Math.pow(10, -digits.fraction()));
+                    // 添加错误消息
+                    if (!digits.message().isEmpty() && !digits.message().equals("{jakarta.validation.constraints.Digits.message}")) {
+                        jsonSchema.put("digitsErrorMessage", digits.message());
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 检查JSON Schema是否为数字类型
+     */
+    private boolean isNumericType(ObjectNode jsonSchema) {
+        if (!jsonSchema.has("type")) {
+            return false;
+        }
+        String type = jsonSchema.get("type").asText();
+        return "integer".equals(type) || "number".equals(type) || 
+               "java.lang.Integer".equals(type) || "java.lang.Long".equals(type) ||
+               "java.lang.Double".equals(type) || "java.lang.Float".equals(type) ||
+               "int".equals(type) || "long".equals(type) || "double".equals(type) || "float".equals(type) ||
+               "Integer".equals(type) || "Long".equals(type) || "Double".equals(type) || "Float".equals(type);
+    }
+
+    /**
+     * 检查JSON Schema是否为字符串类型
+     */
+    private boolean isStringType(ObjectNode jsonSchema) {
+        if (!jsonSchema.has("type")) {
+            return false;
+        }
+        String type = jsonSchema.get("type").asText();
+        return "string".equals(type) || "java.lang.String".equals(type) || "String".equals(type);
+    }
+
+    /**
+     * 检查JSON Schema是否为数组类型
+     */
+    private boolean isArrayType(ObjectNode jsonSchema) {
+        if (!jsonSchema.has("type")) {
+            return false;
+        }
+        String type = jsonSchema.get("type").asText();
+        return "array".equals(type) || type.endsWith("[]") || type.contains("List") || type.contains("Set");
+    }
+
+    /**
      * 构建函数验证模式
      */
     private Map<String, Object> buildValidationSchema(Method method) {
@@ -575,6 +725,8 @@ public class FunctionScanner {
             ObjectNode jsonSchema = null;
             try {
                 jsonSchema = jsonSchemaGenerator.generateSchema(parameter.getType(), true);
+                // 合并验证注解到JSON Schema
+                mergeValidationToJsonSchema(jsonSchema, parameter);
             } catch (Exception e) {
                 log.warn("生成JSON Schema失败: {}", parameter.getType().getName(), e);
             }
@@ -586,7 +738,7 @@ public class FunctionScanner {
                     .required(true)
                     .defaultValue("")
                     .order(i)
-                    .validation(new HashMap<>())
+                    .validation(buildParameterValidation(parameter))
                     .jsonSchema(jsonSchema)
                     .build();
 
