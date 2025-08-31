@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring 增强功能测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+        }
+        .stat-title {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 10px;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .function-test {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 6px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 4px;
+        }
+        .error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Spring 增强功能测试面板</h1>
+        <p>测试 BeanPostProcessor 提供的缓存、验证和日志增强功能</p>
+    </div>
+
+    <div class="container">
+        <h2>📊 增强功能状态</h2>
+        <div id="enhancementStatus">加载中...</div>
+        <button onclick="refreshStatus()">刷新状态</button>
+    </div>
+
+    <div class="container">
+        <h2>🧮 函数测试</h2>
+        
+        <div class="function-test">
+            <h3>缓存测试 - 数学加法函数</h3>
+            <p>多次调用相同参数的函数，观察缓存命中情况</p>
+            <button onclick="testCacheFunction()">测试缓存 (10 + 5)</button>
+            <button onclick="testCacheFunctionDifferent()">测试不同参数 (20 + 15)</button>
+            <div id="cacheTestResult"></div>
+        </div>
+
+        <div class="function-test">
+            <h3>验证测试 - 复杂对象创建</h3>
+            <p>测试参数验证功能</p>
+            <button onclick="testValidationSuccess()">有效参数测试</button>
+            <button onclick="testValidationFailure()">无效参数测试</button>
+            <div id="validationTestResult"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>📈 统计信息</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">缓存统计</div>
+                <div id="cacheStats">加载中...</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">验证统计</div>
+                <div id="validationStats">加载中...</div>
+            </div>
+        </div>
+        <button onclick="refreshStats()">刷新统计</button>
+        <button onclick="clearCache()">清除缓存</button>
+        <button onclick="clearStats()">清除统计</button>
+    </div>
+
+    <script>
+        // 刷新增强功能状态
+        async function refreshStatus() {
+            try {
+                const response = await fetch('/api/enhancement/status');
+                const data = await response.json();
+                document.getElementById('enhancementStatus').innerHTML = `
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                document.getElementById('enhancementStatus').innerHTML = 
+                    `<div class="error">错误: ${error.message}</div>`;
+            }
+        }
+
+        // 测试缓存功能
+        async function testCacheFunction() {
+            const resultDiv = document.getElementById('cacheTestResult');
+            resultDiv.innerHTML = '测试中...';
+            
+            try {
+                const startTime = Date.now();
+                
+                // 第一次调用
+                const response1 = await fetch('/api/functions/com.functionflow.demo.functions.MathFunctions.add/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ a: 10, b: 5 })
+                });
+                const result1 = await response1.text();
+                const time1 = Date.now() - startTime;
+                
+                // 第二次调用（应该命中缓存）
+                const startTime2 = Date.now();
+                const response2 = await fetch('/api/functions/com.functionflow.demo.functions.MathFunctions.add/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ a: 10, b: 5 })
+                });
+                const result2 = await response2.text();
+                const time2 = Date.now() - startTime2;
+                
+                resultDiv.innerHTML = `
+                    <div class="result">
+                        <strong>缓存测试结果:</strong><br>
+                        第一次调用: ${result1} (耗时: ${time1}ms)<br>
+                        第二次调用: ${result2} (耗时: ${time2}ms)<br>
+                        ${time2 < time1 ? '✅ 可能命中缓存' : '❌ 未命中缓存'}
+                    </div>
+                `;
+                
+                // 刷新统计
+                refreshStats();
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">错误: ${error.message}</div>`;
+            }
+        }
+
+        // 测试不同参数的缓存
+        async function testCacheFunctionDifferent() {
+            const resultDiv = document.getElementById('cacheTestResult');
+            resultDiv.innerHTML = '测试中...';
+            
+            try {
+                const response = await fetch('/api/functions/com.functionflow.demo.functions.MathFunctions.add/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ a: 20, b: 15 })
+                });
+                const result = await response.text();
+                
+                resultDiv.innerHTML = `
+                    <div class="result">
+                        <strong>不同参数测试:</strong><br>
+                        20 + 15 = ${result}
+                    </div>
+                `;
+                
+                refreshStats();
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">错误: ${error.message}</div>`;
+            }
+        }
+
+        // 测试验证成功
+        async function testValidationSuccess() {
+            const resultDiv = document.getElementById('validationTestResult');
+            resultDiv.innerHTML = '测试中...';
+            
+            try {
+                const response = await fetch('/api/functions/com.functionflow.demo.functions.ComplexObjectFunctions.createComplexObject/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        name: "张三", 
+                        age: 25, 
+                        email: "zhangsan@example.com" 
+                    })
+                });
+                const result = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="result">
+                        <strong>验证成功:</strong><br>
+                        创建了对象: ${result.name} (${result.age}岁)
+                    </div>
+                `;
+                
+                refreshStats();
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">错误: ${error.message}</div>`;
+            }
+        }
+
+        // 测试验证失败
+        async function testValidationFailure() {
+            const resultDiv = document.getElementById('validationTestResult');
+            resultDiv.innerHTML = '测试中...';
+            
+            try {
+                const response = await fetch('/api/functions/com.functionflow.demo.functions.ComplexObjectFunctions.createComplexObject/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        name: "", // 空名称，应该验证失败
+                        age: 200, // 超过最大年龄，应该验证失败
+                        email: "invalid-email" // 无效邮箱格式
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    resultDiv.innerHTML = `
+                        <div class="result">
+                            <strong>意外成功:</strong><br>
+                            验证应该失败，但创建了对象: ${JSON.stringify(result)}
+                        </div>
+                    `;
+                } else {
+                    const error = await response.text();
+                    resultDiv.innerHTML = `
+                        <div class="result">
+                            <strong>验证失败 (预期):</strong><br>
+                            ${error}
+                        </div>
+                    `;
+                }
+                
+                refreshStats();
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">网络错误: ${error.message}</div>`;
+            }
+        }
+
+        // 刷新统计信息
+        async function refreshStats() {
+            try {
+                const [cacheResponse, validationResponse] = await Promise.all([
+                    fetch('/api/enhancement/cache/stats'),
+                    fetch('/api/enhancement/validation/stats')
+                ]);
+                
+                const cacheData = await cacheResponse.json();
+                const validationData = await validationResponse.json();
+                
+                document.getElementById('cacheStats').innerHTML = 
+                    Object.keys(cacheData).length > 0 ? 
+                    `<pre>${JSON.stringify(cacheData, null, 2)}</pre>` : 
+                    '<div>暂无缓存统计数据</div>';
+                
+                document.getElementById('validationStats').innerHTML = 
+                    Object.keys(validationData).length > 0 ? 
+                    `<pre>${JSON.stringify(validationData, null, 2)}</pre>` : 
+                    '<div>暂无验证统计数据</div>';
+                    
+            } catch (error) {
+                document.getElementById('cacheStats').innerHTML = `<div class="error">错误: ${error.message}</div>`;
+                document.getElementById('validationStats').innerHTML = `<div class="error">错误: ${error.message}</div>`;
+            }
+        }
+
+        // 清除缓存
+        async function clearCache() {
+            try {
+                const response = await fetch('/api/enhancement/cache', { method: 'DELETE' });
+                const result = await response.json();
+                alert(`缓存已清除: ${result.message}`);
+                refreshStats();
+            } catch (error) {
+                alert(`清除缓存失败: ${error.message}`);
+            }
+        }
+
+        // 清除统计
+        async function clearStats() {
+            try {
+                await Promise.all([
+                    fetch('/api/enhancement/cache/stats', { method: 'DELETE' }),
+                    fetch('/api/enhancement/validation/stats', { method: 'DELETE' })
+                ]);
+                alert('统计信息已清除');
+                refreshStats();
+            } catch (error) {
+                alert(`清除统计失败: ${error.message}`);
+            }
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshStatus();
+            refreshStats();
+        });
+    </script>
+</body>
+</html>

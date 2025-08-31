@@ -9,9 +9,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Functions(name = "数学函数", description = "基础数学运算函数集合", category = "数学运算", version = "1.0.0")
-public class MathFunctions {
+public class MathFunctions implements FunctionService {
 
-    @Function(name = "加法", description = "计算两个数的和")
+    @Function(name = "加法", description = "计算两个数的和", cacheable = true, cacheTime = 60)
     public double add(double a, double b) {
         return a + b;
     }

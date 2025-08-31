@@ -38,7 +38,7 @@ public class FunctionFlowTest {
         assertFalse(functions.isEmpty(), "应该发现一些函数");
         
         // 验证特定函数
-        FunctionSchema addFunction = discoveryService.getFunction("MathFunctions.add");
+        FunctionSchema addFunction = discoveryService.getFunction("com.functionflow.demo.functions.MathFunctions.add");
         assertNotNull(addFunction, "应该找到加法函数");
         assertEquals("加法", addFunction.getName());
         assertEquals("数学运算", addFunction.getCategory());
@@ -55,7 +55,7 @@ public class FunctionFlowTest {
         parameters.put("a", 5.0);
         parameters.put("b", 3.0);
         
-        Object result = executionEngine.executeFunction("MathFunctions.add", parameters);
+        Object result = executionEngine.executeFunction("com.functionflow.demo.functions.MathFunctions.add", parameters);
         assertEquals(8.0, result, "5 + 3 应该等于 8");
     }
     
@@ -68,7 +68,7 @@ public class FunctionFlowTest {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("text", "hello world");
         
-        Object result = executionEngine.executeFunction("StringFunctions.toUpperCase", parameters);
+        Object result = executionEngine.executeFunction("com.functionflow.demo.functions.StringFunctions.toUpperCase", parameters);
         assertEquals("HELLO WORLD", result, "字符串应该转换为大写");
     }
     
@@ -83,7 +83,7 @@ public class FunctionFlowTest {
         // 缺少参数 b
         
         assertThrows(RuntimeException.class, () -> {
-            executionEngine.executeFunction("MathFunctions.add", parameters);
+            executionEngine.executeFunction("com.functionflow.demo.functions.MathFunctions.add", parameters);
         }, "缺少必需参数应该抛出异常");
     }
     
@@ -98,7 +98,7 @@ public class FunctionFlowTest {
         parameters.put("str2", "test");
         
         assertThrows(RuntimeException.class, () -> {
-            executionEngine.executeFunction("StringFunctions.concat", parameters);
+            executionEngine.executeFunction("com.functionflow.demo.functions.StringFunctions.concat", parameters);
         }, "违反验证约束应该抛出异常");
     }
     
@@ -113,7 +113,7 @@ public class FunctionFlowTest {
         parameters.put("b", 5.0);
         
         assertThrows(RuntimeException.class, () -> {
-            executionEngine.executeFunctionAsync("MathFunctions.add", parameters);
+            executionEngine.executeFunctionAsync("com.functionflow.demo.functions.MathFunctions.add", parameters);
         }, "非异步函数不应该支持异步执行");
     }
 }

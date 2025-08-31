@@ -1,8 +1,7 @@
 package com.functionflow.demo.config;
 
 import com.functionflow.demo.core.FunctionScanner;
-import com.functionflow.demo.functions.MathFunctions;
-import com.functionflow.demo.functions.StringFunctions;
+
 import com.functionflow.demo.functions.StandardLibraryFunctions;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

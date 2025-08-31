@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Functions(name = "字符串函数", description = "字符串处理函数集合", category = "字符串处理", version = "1.0.0")
-public class StringFunctions {
+public class StringFunctions implements FunctionService {
     
     @Function(name = "字符串连接", description = "连接两个字符串")
     public String concat(String str1, String str2) {

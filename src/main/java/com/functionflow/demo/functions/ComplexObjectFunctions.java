@@ -24,7 +24,7 @@ import java.util.Map;
  */
 @Component
 @Functions(name = "复杂对象函数", description = "处理复杂对象的函数集合", category = "对象处理", version = "1.0.0")
-public class ComplexObjectFunctions {
+public class ComplexObjectFunctions implements FunctionService {
     
     /**
      * 创建复杂对象
