@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /**
  * 函数注解
  */
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Function {
 

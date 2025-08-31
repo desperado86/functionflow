@@ -34,6 +34,12 @@ public class FunctionBeanDefinitionScanner extends ClassPathBeanDefinitionScanne
     protected boolean isCandidateComponent(@NonNull AnnotatedBeanDefinition beanDefinition) {
         AnnotationMetadata metadata = beanDefinition.getMetadata();
         
+        // 如果是接口，跳过（由 DubboInterfaceScanner 处理）
+        if (metadata.isInterface()) {
+            log.debug("跳过接口类: {}", metadata.getClassName());
+            return false;
+        }
+        
         // 检查是否有 @Functions 注解
         boolean hasFunctionsAnnotation = metadata.hasAnnotation(Functions.class.getName());
         

@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
  * 函数集合注解
  * 用于标记包含函数方法的类
  */
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Functions {
     

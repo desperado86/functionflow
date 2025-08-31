@@ -1,0 +1,182 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------------< com.functionflow:demo >------------------------
+[INFO] Building demo 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.5.5:run (default-cli) > test-compile @ demo >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ demo ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 6 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.14.0:compile (default-compile) @ demo ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ demo ---
+[INFO] skip non existing resourceDirectory /Users/lee/cong/demo/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.14.0:testCompile (default-testCompile) @ demo ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] <<< spring-boot:3.5.5:run (default-cli) < test-compile @ demo <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.5.5:run (default-cli) @ demo ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.5)
+
+2025-08-31T16:07:45.954+08:00  INFO 93045 --- [demo] [           main] com.functionflow.demo.DemoApplication    : Starting DemoApplication using Java 17.0.15 with PID 93045 (/Users/lee/cong/demo/target/classes started by lee in /Users/lee/cong/demo)
+2025-08-31T16:07:45.955+08:00  INFO 93045 --- [demo] [           main] com.functionflow.demo.DemoApplication    : No active profile set, falling back to 1 default profile: "default"
+2025-08-31T16:07:46.142+08:00  INFO 93045 --- [demo] [           main] c.f.d.c.FunctionScannerConfiguration     : 开始注册 FunctionBeanDefinitionScanner...
+2025-08-31T16:07:46.142+08:00  INFO 93045 --- [demo] [           main] c.f.d.c.FunctionBeanDefinitionScanner    : FunctionBeanDefinitionScanner 初始化完成
+2025-08-31T16:07:46.142+08:00  INFO 93045 --- [demo] [           main] c.f.d.c.FunctionBeanDefinitionScanner    : 开始扫描函数组件，包路径: [com.functionflow.demo.functions, com.functionflow.demo.example]
+2025-08-31T16:07:46.145+08:00  INFO 93045 --- [demo] [           main] c.f.d.c.FunctionBeanDefinitionScanner    : 扫描完成，发现 1 个函数组件
+2025-08-31T16:07:46.145+08:00  INFO 93045 --- [demo] [           main] c.f.d.c.FunctionBeanDefinitionScanner    : 注册函数组件 Bean: com.functionflow.demo.functions.SimpleRemoteService
+2025-08-31T16:07:46.145+08:00  INFO 93045 --- [demo] [           main] c.f.d.c.FunctionScannerConfiguration     : FunctionBeanDefinitionScanner 注册完成，扫描到 1 个函数组件
+2025-08-31T16:07:46.355+08:00  INFO 93045 --- [demo] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8099 (http)
+2025-08-31T16:07:46.360+08:00  INFO 93045 --- [demo] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-08-31T16:07:46.360+08:00  INFO 93045 --- [demo] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.44]
+2025-08-31T16:07:46.377+08:00  INFO 93045 --- [demo] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-08-31T16:07:46.377+08:00  INFO 93045 --- [demo] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 407 ms
+2025-08-31T16:07:46.443+08:00  INFO 93045 --- [demo] [           main] c.f.demo.core.DubboInterfaceScanner      : 开始扫描 Dubbo 接口...
+2025-08-31T16:07:46.444+08:00  INFO 93045 --- [demo] [           main] c.f.demo.core.DubboInterfaceScanner      : Dubbo 接口扫描完成，共发现 0 个接口
+2025-08-31T16:07:46.451+08:00  INFO 93045 --- [demo] [           main] c.f.demo.core.FunctionMetadataManager    : 开始初始化函数元数据管理器...
+2025-08-31T16:07:46.452+08:00  INFO 93045 --- [demo] [           main] c.f.d.c.FunctionFlowBeanPostProcessor    : 发现函数组件: complexObjectFunctions -> ComplexObjectFunctions
+2025-08-31T16:07:46.452+08:00  INFO 93045 --- [demo] [           main] c.f.d.c.FunctionFlowBeanPostProcessor    : 函数组件详情: 名称=复杂对象函数, 类别=对象处理, 版本=1.0.0, 命名空间=
+2025-08-31T16:07:46.455+08:00  INFO 93045 --- [demo] [           main] c.f.demo.core.FunctionScanner            : 注册函数: com.functionflow.demo.functions.ComplexObjectFunctions.createComplexObject -> 创建复杂对象
+2025-08-31T16:07:46.455+08:00  INFO 93045 --- [demo] [           main] c.f.demo.core.FunctionScanner            : 注册函数: com.functionflow.demo.functions.ComplexObjectFunctions.processComplexObject -> 处理复杂对象
+2025-08-31T16:07:46.455+08:00  INFO 93045 --- [demo] [           main] c.f.demo.core.FunctionScanner            : 注册函数: com.functionflow.demo.functions.ComplexObjectFunctions.extractObjectInfo -> 提取对象信息
+2025-08-31T16:07:46.455+08:00  INFO 93045 --- [demo] [           main] c.f.demo.core.FunctionScanner            : 注册函数: com.functionflow.demo.functions.ComplexObjectFunctions.validateComplexObject -> 验证复杂对象
+2025-08-31T16:07:46.455+08:00  INFO 93045 --- [demo] [           main] c.f.demo.core.FunctionScanner            : 注册函数: com.functionflow.demo.functions.ComplexObjectFunctions.mergeComplexObjects -> 合并复杂对象
+2025-08-31T16:07:46.456+08:00  INFO 93045 --- [demo] [           main] c.f.d.c.FunctionFlowBeanPostProcessor    : 自动注册函数组件: ComplexObjectFunctions
+2025-08-31T16:07:46.456+08:00  INFO 93045 --- [demo] [           main] c.f.d.c.FunctionFlowBeanPostProcessor    : 发现函数组件: mathFunctions -> MathFunctions
+2025-08-31T16:07:46.456+08:00  INFO 93045 --- [demo] [           main] c.f.d.c.FunctionFlowBeanPostProcessor    : 函数组件详情: 名称=数学函数, 类别=数学运算, 版本=1.0.0, 命名空间=
+2025-08-31T16:07:46.456+08:00  INFO 93045 --- [demo] [           main] c.f.d.c.FunctionFlowBeanPostProcessor    : 发现函数组件: standardLibraryFunctions -> StandardLibraryFunctions
+2025-08-31T16:07:46.456+08:00  INFO 93045 --- [demo] [           main] c.f.d.c.FunctionFlowBeanPostProcessor    : 函数组件详情: 名称=标准库函数, 类别=标准库, 版本=1.0.0, 命名空间=
+2025-08-31T16:07:46.456+08:00  INFO 93045 --- [demo] [           main] c.f.d.c.FunctionFlowBeanPostProcessor    : 自动注册函数组件: StandardLibraryFunctions
+2025-08-31T16:07:46.456+08:00  INFO 93045 --- [demo] [           main] c.f.d.c.FunctionFlowBeanPostProcessor    : 发现函数组件: stringFunctions -> StringFunctions
+2025-08-31T16:07:46.456+08:00  INFO 93045 --- [demo] [           main] c.f.d.c.FunctionFlowBeanPostProcessor    : 函数组件详情: 名称=字符串函数, 类别=字符串处理, 版本=1.0.0, 命名空间=
+2025-08-31T16:07:46.457+08:00  INFO 93045 --- [demo] [           main] c.f.demo.core.FunctionScanner            : 注册函数: com.functionflow.demo.functions.StringFunctions.length -> 字符串长度
+2025-08-31T16:07:46.457+08:00  INFO 93045 --- [demo] [           main] c.f.demo.core.FunctionScanner            : 注册函数: com.functionflow.demo.functions.StringFunctions.substring -> 字符串截取
+2025-08-31T16:07:46.457+08:00  INFO 93045 --- [demo] [           main] c.f.demo.core.FunctionScanner            : 注册函数: com.functionflow.demo.functions.StringFunctions.replace -> 字符串替换
+2025-08-31T16:07:46.457+08:00  INFO 93045 --- [demo] [           main] c.f.demo.core.FunctionScanner            : 注册函数: com.functionflow.demo.functions.StringFunctions.toLowerCase -> 字符串转小写
+2025-08-31T16:07:46.457+08:00  INFO 93045 --- [demo] [           main] c.f.demo.core.FunctionScanner            : 注册函数: com.functionflow.demo.functions.StringFunctions.toUpperCase -> 字符串转大写
+2025-08-31T16:07:46.457+08:00  INFO 93045 --- [demo] [           main] c.f.demo.core.FunctionScanner            : 注册函数: com.functionflow.demo.functions.StringFunctions.concat -> 字符串连接
+2025-08-31T16:07:46.457+08:00  INFO 93045 --- [demo] [           main] c.f.d.c.FunctionFlowBeanPostProcessor    : 自动注册函数组件: StringFunctions
+2025-08-31T16:07:46.457+08:00 ERROR 93045 --- [demo] [           main] c.f.demo.core.FunctionMetadataManager    : 函数元数据管理器初始化失败
+
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'simpleRemoteService' defined in file [/Users/lee/cong/demo/target/classes/com/functionflow/demo/functions/SimpleRemoteService.class]: Failed to instantiate [com.functionflow.demo.functions.SimpleRemoteService]: Specified class is an interface
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateBean(AbstractAutowireCapableBeanFactory.java:1357) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1242) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:569) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.getBeansWithAnnotation(DefaultListableBeanFactory.java:795) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.context.support.AbstractApplicationContext.getBeansWithAnnotation(AbstractApplicationContext.java:1440) ~[spring-context-6.2.10.jar:6.2.10]
+	at com.functionflow.demo.core.FunctionMetadataManager.scanAndGenerateMetadata(FunctionMetadataManager.java:61) ~[classes/:na]
+	at com.functionflow.demo.core.FunctionMetadataManager.initialize(FunctionMetadataManager.java:48) ~[classes/:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[na:na]
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569) ~[na:na]
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor$LifecycleMethod.invoke(InitDestroyAnnotationBeanPostProcessor.java:457) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor$LifecycleMetadata.invokeInitMethods(InitDestroyAnnotationBeanPostProcessor.java:401) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor.postProcessBeforeInitialization(InitDestroyAnnotationBeanPostProcessor.java:219) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyBeanPostProcessorsBeforeInitialization(AbstractAutowireCapableBeanFactory.java:429) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1818) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:607) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1752) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1635) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:913) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:791) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:240) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1395) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1232) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:569) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.instantiateSingleton(DefaultListableBeanFactory.java:1222) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingleton(DefaultListableBeanFactory.java:1188) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:1123) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:987) ~[spring-context-6.2.10.jar:6.2.10]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:627) ~[spring-context-6.2.10.jar:6.2.10]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146) ~[spring-boot-3.5.5.jar:3.5.5]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:752) ~[spring-boot-3.5.5.jar:3.5.5]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439) ~[spring-boot-3.5.5.jar:3.5.5]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318) ~[spring-boot-3.5.5.jar:3.5.5]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1361) ~[spring-boot-3.5.5.jar:3.5.5]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1350) ~[spring-boot-3.5.5.jar:3.5.5]
+	at com.functionflow.demo.DemoApplication.main(DemoApplication.java:13) ~[classes/:na]
+Caused by: org.springframework.beans.BeanInstantiationException: Failed to instantiate [com.functionflow.demo.functions.SimpleRemoteService]: Specified class is an interface
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:112) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateBean(AbstractAutowireCapableBeanFactory.java:1351) ~[spring-beans-6.2.10.jar:6.2.10]
+	... 52 common frames omitted
+
+2025-08-31T16:07:46.460+08:00  WARN 93045 --- [demo] [           main] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'simpleRemoteService' defined in file [/Users/lee/cong/demo/target/classes/com/functionflow/demo/functions/SimpleRemoteService.class]: Failed to instantiate [com.functionflow.demo.functions.SimpleRemoteService]: Specified class is an interface
+2025-08-31T16:07:46.461+08:00  INFO 93045 --- [demo] [           main] o.apache.catalina.core.StandardService   : Stopping service [Tomcat]
+2025-08-31T16:07:46.468+08:00  INFO 93045 --- [demo] [           main] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2025-08-31T16:07:46.474+08:00 ERROR 93045 --- [demo] [           main] o.s.boot.SpringApplication               : Application run failed
+
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'simpleRemoteService' defined in file [/Users/lee/cong/demo/target/classes/com/functionflow/demo/functions/SimpleRemoteService.class]: Failed to instantiate [com.functionflow.demo.functions.SimpleRemoteService]: Specified class is an interface
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateBean(AbstractAutowireCapableBeanFactory.java:1357) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1242) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:569) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.instantiateSingleton(DefaultListableBeanFactory.java:1222) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingleton(DefaultListableBeanFactory.java:1188) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:1123) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:987) ~[spring-context-6.2.10.jar:6.2.10]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:627) ~[spring-context-6.2.10.jar:6.2.10]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146) ~[spring-boot-3.5.5.jar:3.5.5]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:752) ~[spring-boot-3.5.5.jar:3.5.5]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439) ~[spring-boot-3.5.5.jar:3.5.5]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318) ~[spring-boot-3.5.5.jar:3.5.5]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1361) ~[spring-boot-3.5.5.jar:3.5.5]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1350) ~[spring-boot-3.5.5.jar:3.5.5]
+	at com.functionflow.demo.DemoApplication.main(DemoApplication.java:13) ~[classes/:na]
+Caused by: org.springframework.beans.BeanInstantiationException: Failed to instantiate [com.functionflow.demo.functions.SimpleRemoteService]: Specified class is an interface
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:112) ~[spring-beans-6.2.10.jar:6.2.10]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateBean(AbstractAutowireCapableBeanFactory.java:1351) ~[spring-beans-6.2.10.jar:6.2.10]
+	... 19 common frames omitted
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  1.533 s
+[INFO] Finished at: 2025-08-31T16:07:46+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.springframework.boot:spring-boot-maven-plugin:3.5.5:run (default-cli) on project demo: Process terminated with exit code: 1 -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException

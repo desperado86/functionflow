@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dubbo 服务管理</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1, h2, h3 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .status-card {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        .status-card.warning {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+        }
+        .status-card.error {
+            background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+        }
+        .status-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .status-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        .service-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            background: white;
+            transition: all 0.3s ease;
+        }
+        .service-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .service-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .service-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+        }
+        .service-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        .service-status.active {
+            background: #d4edda;
+            color: #155724;
+        }
+        .service-status.inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .service-info {
+            margin-bottom: 15px;
+        }
+        .service-info div {
+            margin: 5px 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+        .service-methods {
+            max-height: 150px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        .method-item {
+            padding: 5px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .method-item:last-child {
+            border-bottom: none;
+        }
+        .method-name {
+            font-weight: bold;
+            color: #495057;
+        }
+        .method-params {
+            font-size: 0.8em;
+            color: #6c757d;
+            margin-left: 10px;
+        }
+        .service-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button.secondary {
+            background: #6c757d;
+        }
+        button.secondary:hover {
+            background: #545b62;
+        }
+        button.danger {
+            background: #dc3545;
+        }
+        button.danger:hover {
+            background: #c82333;
+        }
+        .config-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .config-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+        }
+        .config-title {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 10px;
+        }
+        .config-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            padding: 5px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .config-item:last-child {
+            border-bottom: none;
+        }
+        .config-key {
+            font-weight: 500;
+            color: #495057;
+        }
+        .config-value {
+            color: #007bff;
+            font-family: monospace;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .test-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .test-content {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+        .test-form {
+            margin: 20px 0;
+        }
+        .test-form label {
+            display: block;
+            margin: 10px 0 5px 0;
+            font-weight: bold;
+        }
+        .test-form input, .test-form textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .test-form textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        .test-result {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔌 Dubbo 服务管理</h1>
+        <p>管理和监控 Dubbo 分布式服务</p>
+        
+        <div class="status-grid" id="statusGrid">
+            <div class="status-card">
+                <div class="status-number" id="totalServices">-</div>
+                <div class="status-label">服务总数</div>
+            </div>
+            <div class="status-card">
+                <div class="status-number" id="activeServices">-</div>
+                <div class="status-label">活跃服务</div>
+            </div>
+            <div class="status-card">
+                <div class="status-number" id="totalCalls">-</div>
+                <div class="status-label">总调用次数</div>
+            </div>
+            <div class="status-card">
+                <div class="status-number" id="successRate">-</div>
+                <div class="status-label">成功率</div>
+            </div>
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <button onclick="refreshServices()">刷新服务</button>
+            <button onclick="rescanServices()">重新扫描</button>
+            <button onclick="clearStats()" class="danger">清除统计</button>
+            <button onclick="showConfig()" class="secondary">配置信息</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>📋 Dubbo 服务列表</h2>
+        <div id="servicesContainer">
+            <div class="loading">加载中...</div>
+        </div>
+    </div>
+
+    <div class="container" id="configContainer" style="display: none;">
+        <h2>⚙️ Dubbo 配置</h2>
+        <div class="config-section" id="configSection">
+            <div class="loading">加载中...</div>
+        </div>
+    </div>
+
+    <!-- 测试对话框 -->
+    <div class="test-dialog" id="testDialog">
+        <div class="test-content">
+            <h3>测试服务调用</h3>
+            <div class="test-form">
+                <label>服务名称:</label>
+                <input type="text" id="testServiceName" readonly>
+                
+                <label>方法名称:</label>
+                <input type="text" id="testMethodName" readonly>
+                
+                <label>参数 (JSON 格式):</label>
+                <textarea id="testParameters" placeholder='{"param1": "value1", "param2": "value2"}'></textarea>
+            </div>
+            
+            <div style="margin: 20px 0;">
+                <button onclick="executeTest()">执行测试</button>
+                <button onclick="closeTestDialog()" class="secondary">取消</button>
+            </div>
+            
+            <div id="testResult"></div>
+        </div>
+    </div>
+
+    <script>
+        let servicesData = {};
+        let statsData = {};
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDubboData();
+        });
+
+        // 加载 Dubbo 数据
+        async function loadDubboData() {
+            try {
+                await Promise.all([
+                    loadOverview(),
+                    loadServices(),
+                    loadServiceStats()
+                ]);
+            } catch (error) {
+                console.error('加载 Dubbo 数据失败:', error);
+                showError('加载数据失败: ' + error.message);
+            }
+        }
+
+        // 加载概览信息
+        async function loadOverview() {
+            const response = await fetch('/api/dubbo/overview');
+            const overview = await response.json();
+            
+            updateStatusCards(overview);
+        }
+
+        // 加载服务列表
+        async function loadServices() {
+            const response = await fetch('/api/dubbo/services');
+            servicesData = await response.json();
+            displayServices(servicesData);
+        }
+
+        // 加载服务统计
+        async function loadServiceStats() {
+            const response = await fetch('/api/dubbo/service-stats');
+            statsData = await response.json();
+        }
+
+        // 更新状态卡片
+        function updateStatusCards(overview) {
+            const stats = overview.stats || {};
+            
+            document.getElementById('totalServices').textContent = stats.totalInterfaces || 0;
+            document.getElementById('activeServices').textContent = stats.totalProxies || 0;
+            
+            // 计算总调用次数和成功率
+            let totalCalls = 0;
+            let totalSuccess = 0;
+            
+            Object.values(statsData).forEach(stat => {
+                totalCalls += stat.totalCalls || 0;
+                totalSuccess += stat.successCalls || 0;
+            });
+            
+            document.getElementById('totalCalls').textContent = totalCalls;
+            document.getElementById('successRate').textContent = 
+                totalCalls > 0 ? ((totalSuccess / totalCalls) * 100).toFixed(1) + '%' : '100%';
+        }
+
+        // 显示服务列表
+        function displayServices(services) {
+            const container = document.getElementById('servicesContainer');
+            
+            if (Object.keys(services).length === 0) {
+                container.innerHTML = '<div class="loading">没有发现 Dubbo 服务</div>';
+                return;
+            }
+            
+            const html = Object.entries(services).map(([serviceName, serviceInfo]) => {
+                const stats = statsData[serviceName] || {};
+                const isActive = serviceInfo.proxyCreated;
+                
+                return `
+                    <div class="service-card">
+                        <div class="service-header">
+                            <div class="service-name">${serviceName}</div>
+                            <div class="service-status ${isActive ? 'active' : 'inactive'}">
+                                ${isActive ? '活跃' : '未激活'}
+                            </div>
+                        </div>
+                        
+                        <div class="service-info">
+                            <div><strong>接口:</strong> ${serviceInfo.interfaceClass}</div>
+                            <div><strong>版本:</strong> ${serviceInfo.version || 'N/A'}</div>
+                            <div><strong>分组:</strong> ${serviceInfo.group || 'N/A'}</div>
+                            <div><strong>超时:</strong> ${serviceInfo.timeout}ms</div>
+                            <div><strong>协议:</strong> ${serviceInfo.protocol}</div>
+                            <div><strong>描述:</strong> ${serviceInfo.description || '无'}</div>
+                        </div>
+                        
+                        <div class="service-methods" id="methods-${serviceName}">
+                            <div style="text-align: center; color: #666;">点击"查看详情"加载方法列表</div>
+                        </div>
+                        
+                        <div style="margin: 10px 0;">
+                            <strong>调用统计:</strong>
+                            总计: ${stats.totalCalls || 0}, 
+                            成功: ${stats.successCalls || 0}, 
+                            失败: ${stats.failureCalls || 0}, 
+                            平均耗时: ${(stats.avgExecutionTime || 0).toFixed(2)}ms
+                        </div>
+                        
+                        <div class="service-actions">
+                            <button onclick="viewServiceDetail('${serviceName}')">查看详情</button>
+                            <button onclick="testService('${serviceName}')" ${!isActive ? 'disabled' : ''}>测试调用</button>
+                            <button onclick="showServiceStats('${serviceName}')" class="secondary">统计信息</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = `<div class="service-grid">${html}</div>`;
+        }
+
+        // 查看服务详情
+        async function viewServiceDetail(serviceName) {
+            try {
+                const response = await fetch(`/api/dubbo/services/${serviceName}`);
+                const detail = await response.json();
+                
+                const methodsContainer = document.getElementById(`methods-${serviceName}`);
+                
+                if (detail.methods && detail.methods.length > 0) {
+                    const methodsHtml = detail.methods.map(method => `
+                        <div class="method-item">
+                            <div class="method-name">
+                                ${method.functionName || method.name}
+                                <button style="float: right; padding: 2px 6px; font-size: 0.7em;" 
+                                        onclick="openTestDialog('${serviceName}', '${method.name}')">测试</button>
+                            </div>
+                            <div class="method-params">
+                                返回: ${method.returnType}, 
+                                参数: [${method.parameterTypes.join(', ')}]
+                                ${method.functionDescription ? '<br>描述: ' + method.functionDescription : ''}
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    methodsContainer.innerHTML = methodsHtml;
+                } else {
+                    methodsContainer.innerHTML = '<div style="text-align: center; color: #666;">该服务没有方法</div>';
+                }
+            } catch (error) {
+                console.error('加载服务详情失败:', error);
+                alert('加载服务详情失败: ' + error.message);
+            }
+        }
+
+        // 测试服务
+        function testService(serviceName) {
+            alert(`测试服务: ${serviceName}\n\n这是一个模拟功能，实际实现中会调用真实的 Dubbo 服务。`);
+        }
+
+        // 显示服务统计
+        function showServiceStats(serviceName) {
+            const stats = statsData[serviceName];
+            if (!stats) {
+                alert('该服务暂无统计数据');
+                return;
+            }
+            
+            const message = `
+服务统计信息: ${serviceName}
+
+总调用次数: ${stats.totalCalls}
+成功次数: ${stats.successCalls}
+失败次数: ${stats.failureCalls}
+成功率: ${(stats.getSuccessRate ? stats.getSuccessRate() * 100 : ((stats.successCalls || 0) / (stats.totalCalls || 1)) * 100).toFixed(2)}%
+平均执行时间: ${(stats.avgExecutionTime || 0).toFixed(2)}ms
+总执行时间: ${stats.totalExecutionTime || 0}ms
+            `;
+            
+            alert(message);
+        }
+
+        // 打开测试对话框
+        function openTestDialog(serviceName, methodName) {
+            document.getElementById('testServiceName').value = serviceName;
+            document.getElementById('testMethodName').value = methodName;
+            document.getElementById('testParameters').value = '{}';
+            document.getElementById('testResult').innerHTML = '';
+            document.getElementById('testDialog').style.display = 'flex';
+        }
+
+        // 关闭测试对话框
+        function closeTestDialog() {
+            document.getElementById('testDialog').style.display = 'none';
+        }
+
+        // 执行测试
+        async function executeTest() {
+            const serviceName = document.getElementById('testServiceName').value;
+            const methodName = document.getElementById('testMethodName').value;
+            const parametersText = document.getElementById('testParameters').value;
+            
+            try {
+                let parameters = {};
+                if (parametersText.trim()) {
+                    parameters = JSON.parse(parametersText);
+                }
+                
+                const response = await fetch(`/api/dubbo/test/${serviceName}/${methodName}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(parameters)
+                });
+                
+                const result = await response.json();
+                
+                document.getElementById('testResult').innerHTML = `
+                    <div class="test-result">
+调用结果:
+${JSON.stringify(result, null, 2)}
+                    </div>
+                `;
+                
+                // 刷新统计数据
+                loadServiceStats();
+                
+            } catch (error) {
+                document.getElementById('testResult').innerHTML = `
+                    <div class="test-result" style="color: red;">
+错误: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // 显示配置信息
+        async function showConfig() {
+            try {
+                const response = await fetch('/api/dubbo/config');
+                const config = await response.json();
+                
+                const configHtml = `
+                    <div class="config-card">
+                        <div class="config-title">应用配置</div>
+                        <div class="config-item">
+                            <span class="config-key">应用名称:</span>
+                            <span class="config-value">${config.applicationName}</span>
+                        </div>
+                        <div class="config-item">
+                            <span class="config-key">启用状态:</span>
+                            <span class="config-value">${config.enabled ? '启用' : '禁用'}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="config-card">
+                        <div class="config-title">注册中心配置</div>
+                        <div class="config-item">
+                            <span class="config-key">地址:</span>
+                            <span class="config-value">${config.registry.address}</span>
+                        </div>
+                        <div class="config-item">
+                            <span class="config-key">协议:</span>
+                            <span class="config-value">${config.registry.protocol}</span>
+                        </div>
+                        <div class="config-item">
+                            <span class="config-key">超时:</span>
+                            <span class="config-value">${config.registry.timeout}ms</span>
+                        </div>
+                        <div class="config-item">
+                            <span class="config-key">启用状态:</span>
+                            <span class="config-value">${config.registry.enabled ? '启用' : '禁用'}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="config-card">
+                        <div class="config-title">协议配置</div>
+                        <div class="config-item">
+                            <span class="config-key">协议名称:</span>
+                            <span class="config-value">${config.protocol.name}</span>
+                        </div>
+                        <div class="config-item">
+                            <span class="config-key">端口:</span>
+                            <span class="config-value">${config.protocol.port}</span>
+                        </div>
+                        <div class="config-item">
+                            <span class="config-key">线程数:</span>
+                            <span class="config-value">${config.protocol.threads}</span>
+                        </div>
+                        <div class="config-item">
+                            <span class="config-key">序列化:</span>
+                            <span class="config-value">${config.protocol.serialization}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="config-card">
+                        <div class="config-title">消费者配置</div>
+                        <div class="config-item">
+                            <span class="config-key">超时:</span>
+                            <span class="config-value">${config.consumer.timeout}ms</span>
+                        </div>
+                        <div class="config-item">
+                            <span class="config-key">重试次数:</span>
+                            <span class="config-value">${config.consumer.retries}</span>
+                        </div>
+                        <div class="config-item">
+                            <span class="config-key">负载均衡:</span>
+                            <span class="config-value">${config.consumer.loadbalance}</span>
+                        </div>
+                        <div class="config-item">
+                            <span class="config-key">异步调用:</span>
+                            <span class="config-value">${config.consumer.async ? '启用' : '禁用'}</span>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('configSection').innerHTML = configHtml;
+                document.getElementById('configContainer').style.display = 'block';
+                
+            } catch (error) {
+                console.error('加载配置失败:', error);
+                alert('加载配置失败: ' + error.message);
+            }
+        }
+
+        // 刷新服务
+        async function refreshServices() {
+            try {
+                await loadDubboData();
+                alert('服务列表已刷新');
+            } catch (error) {
+                alert('刷新失败: ' + error.message);
+            }
+        }
+
+        // 重新扫描服务
+        async function rescanServices() {
+            try {
+                const response = await fetch('/api/dubbo/rescan', {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                
+                alert(result.message);
+                await loadDubboData();
+            } catch (error) {
+                alert('重新扫描失败: ' + error.message);
+            }
+        }
+
+        // 清除统计
+        async function clearStats() {
+            if (!confirm('确定要清除所有 Dubbo 服务调用统计吗？')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/dubbo/service-stats', {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                
+                alert(result.message);
+                await loadServiceStats();
+                await loadOverview();
+                displayServices(servicesData);
+            } catch (error) {
+                alert('清除统计失败: ' + error.message);
+            }
+        }
+
+        // 显示错误信息
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            document.body.insertBefore(errorDiv, document.body.firstChild);
+            
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
